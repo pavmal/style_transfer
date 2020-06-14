@@ -1,15 +1,15 @@
 from PIL import Image
 
-# import torch
-# import torch.nn as nn
-# import torch.nn.functional as F
-# import torch.optim as optim
-#
-# import matplotlib.pyplot as plt
-#
-#
-# import torchvision.transforms as transforms
-# import torchvision.models as models
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+
+import matplotlib.pyplot as plt
+
+
+import torchvision.transforms as transforms
+import torchvision.models as models
 
 import copy
 
