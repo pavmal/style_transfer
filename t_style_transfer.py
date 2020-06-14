@@ -180,16 +180,18 @@ def photo_handler(message):
     print(res)
 
     respon = requests.get(res)
-    print(respon.content)
+    #print(respon.content)
     #with open('111.jpg', 'wb') as new_file:
     #    new_file.write(res)
     print('respon - ok')
 
     file_info = bot.get_file(message.photo[0].file_id)
-    downloaded_file = bot.download_file(file_info.file_path)
-    with open('file_1.png', 'wb') as new_file:
-        new_file.write(downloaded_file)
-
+    downloaded_photo = bot.download_file(file_info.file_path)
+    file_name = user_id + '_1.png'
+    with open(file_name, 'wb') as new_file:
+        new_file.write(downloaded_photo)
+    photo = open(file_name, 'rb')
+    bot.send_photo(message.from_user.id, photo)
     # src = message.photo[0].file_id
 
 
