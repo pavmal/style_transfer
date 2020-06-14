@@ -10,7 +10,6 @@ import copy
 from PIL import Image
 
 IMSIZE = 256
-IMSIZE = 128
 NUM_STEPS = 300
 
 

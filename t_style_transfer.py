@@ -10,40 +10,15 @@ import warnings
 warnings.filterwarnings('ignore')
 
 bot = telebot.TeleBot(os.environ['BOT_TOKEN'])
-REDIS_URL = os.environ.get('REDIS_URL')
 all_user_data = {}
 
 BTN_PICTURE = 'Выбери картинку для трансформации'
 BTN_STYLE = 'Выбери картинку со стилем'
 BTN_DONE = 'Трансформировать'
 GREETINGS = ['hi', 'привет']
-GO_TO_TRANSFORM = ['ещё', 'да', '+']
 ANSWER_BASE = 'Я тебя не понял :('
 
 from my_models import *
-
-
-def save_data(key, value):
-    """
-    Сохранение данных по игроку в базу redis
-    """
-    if REDIS_URL:
-        redis_db = redis.from_url(REDIS_URL)
-        redis_db.set(key, value)
-
-
-def load_data(key):
-    """
-    Загрузка сохраненных данных по игроку
-    :param key: id игрока в базе
-    :return: строка со словарем
-    """
-    if REDIS_URL:
-        redis_db = redis.from_url(REDIS_URL)
-        if redis_db.get(key):
-            return redis_db.get(key).decode("utf-8")
-    else:
-        return all_user_data.get(key)
 
 
 @bot.message_handler(func=lambda message: True)
@@ -54,17 +29,11 @@ def dispatcher(message):
     :return: вызов необходимого обработчика с учетом статуса игрока в дереве вопросов
     """
     user_id = str(message.from_user.id)
-    if REDIS_URL:  # если подключена база redis
-        val_str = load_data(user_id)
-        if val_str:
-            all_user_data[str(user_id)] = json.loads(val_str)
-
-    if (user_id not in all_user_data) or (all_user_data[user_id] == None):
-        all_user_data[user_id] = {}
-        all_user_data[user_id]['id_pic'] = ''
-        all_user_data[user_id]['id_style'] = ''
-        all_user_data[user_id]['state_pic'] = 0
-        all_user_data[user_id]['state_style'] = 0
+    all_user_data[user_id] = {}
+    all_user_data[user_id]['id_pic'] = ''
+    all_user_data[user_id]['id_style'] = ''
+    all_user_data[user_id]['state_pic'] = 0
+    all_user_data[user_id]['state_style'] = 0
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     keyboard.add(types.KeyboardButton(BTN_PICTURE),
@@ -75,17 +44,14 @@ def dispatcher(message):
         bot.reply_to(message, 'Это бот для преобразования картинок и фотографий' + '\n' +
                      'путём переноса стиля с одной картинки на другую', reply_markup=keyboard)
 
-    print(all_user_data)
     if all_user_data[user_id]['state_pic'] == 1 or all_user_data[user_id]['state_style'] == 1:
         bot.reply_to(message, 'Нужно выбрать картинку')
     if all_user_data[user_id]['state_pic'] == 0 and all_user_data[user_id]['state_style'] == 0:
         text_handler(message)
     else:
         try:
-            print('ветка docum')
             document_handler(message)
         except:
-            print('ветка фото')
             photo_handler(message)
 
 
@@ -98,6 +64,10 @@ def text_handler(message):
     user_id = str(message.from_user.id)
     if message.text.lower().strip() == '/start':
         pass  # обрабатывается в процедуре диспетчера
+
+    elif message.text.lower().strip() in GREETINGS:
+        bot.reply_to(message, 'Ну, Привет, {}!\nЗагружай картинки и пробуй перенос стиля'.format(
+            str(message.from_user.first_name)))
 
     elif message.text == BTN_PICTURE:
         all_user_data[user_id]['state_pic'] = 1
@@ -128,7 +98,6 @@ def text_handler(message):
     else:
         bot.reply_to(message, ANSWER_BASE + '\n' + 'Выбери действие из меню клавиатуры')
 
-    # save_data(user_id, json.dumps(all_user_data[user_id]))
 
 
 @bot.message_handler(content_types=["photo"])
@@ -161,7 +130,6 @@ def photo_handler(message):
     # photo = open(file_name, 'rb')
     # bot.send_photo(message.from_user.id, photo)
 
-    # save_data(user_id, json.dumps(all_user_data[user_id]))
     print(all_user_data)
 
 
@@ -180,7 +148,6 @@ def document_handler(message):
     # docum = open(file_name, 'rb')
     # bot.send_photo(message.from_user.id, docum)
 
-    # save_data(user_id, json.dumps(all_user_data[user_id]))
     print(all_user_data)
 
 
