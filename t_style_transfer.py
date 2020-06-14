@@ -1,10 +1,8 @@
-import os, json
-import redis
+import os
 import numpy as np
 
 import telebot
 from telebot import types
-
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -99,7 +97,6 @@ def text_handler(message):
         bot.reply_to(message, ANSWER_BASE + '\n' + 'Выбери действие из меню клавиатуры')
 
 
-
 @bot.message_handler(content_types=["photo"])
 def photo_handler(message):
     user_id = str(message.from_user.id)
@@ -172,7 +169,4 @@ if __name__ == '__main__':
     # style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
     # style_transform()
 
-    #    if REDIS_URL:
-    #        redis_db = redis.from_url(REDIS_URL)
-    #        redis_db.delete('409088886')
     bot.polling()
