@@ -92,9 +92,12 @@ def dispatcher(message):
     if all_user_data[user_id]['state_pic'] == 0 and all_user_data[user_id]['state_style'] == 0:
         text_handler(message)
     else:
-        document_handler(message)
-        print('ветка фото')
-        photo_handler(message)
+        try:
+            print('ветка docum')
+            document_handler(message)
+        except:
+            print('ветка фото')
+            photo_handler(message)
 
     # print('Состояние до вопроса:\n{}'.format(all_user_data))
     # if all_user_data[user_id]['state'] == NEW_USER:
