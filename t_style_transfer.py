@@ -10,7 +10,8 @@ from telebot import apihelper
 #import config
 # from PIL import Image
 
-
+import warnings
+warnings.filterwarnings('ignore')
 
 #apihelper.proxy = {'http': 'socks5://78.46.218.20:14516'}
 #apihelper.proxy = {'http': 'socks5://student:TH8FwlMMwWvbJF8FYcq0@178.128.203.1:1080'}
@@ -273,7 +274,7 @@ def style_transform(img_content, img_style):
 
 
 if __name__ == '__main__':
-    style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
+    #style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
     # style_transform()
 
     #    if REDIS_URL:
