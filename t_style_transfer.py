@@ -175,29 +175,20 @@ def photo_handler(message):
 
 
     print(file_info.file_path)
-    #url = 'https://api.telegram.org/file/bot'+os.environ['BOT_TOKEN']+'/'+file_info.file_path
-    #short_path = requests.get(url)
     res = bot.get_file_url(file_id=message.photo[0].file_id)
     #f = requests.get(res)
     print(res)
 
-
-    #photo = open(res, 'rb')
-
-    #photo = open(file_info.file_path, 'rb')
-
-    #urllib.request.urlretrieve(res , "local.jpg")
-    #print(f.content)
-    #bot.download_file(file_info.file_path)
-    #downloaded_file = bot.download_file(file_info.file_path)
-
+    respon = requests.get(res)
+    print(respon.content)
     #with open('111.jpg', 'wb') as new_file:
     #    new_file.write(res)
+    print('respon - ok')
 
-    #file_info = bot.get_file(message.photo[0].file_id)
-    #downloaded_file = bot.download_file(file_info.file_path)
-    # with open('file_1.png', 'wb') as new_file:
-    #     new_file.write(downloaded_file)
+    file_info = bot.get_file(message.photo[0].file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    with open('file_1.png', 'wb') as new_file:
+        new_file.write(downloaded_file)
 
     # src = message.photo[0].file_id
 
