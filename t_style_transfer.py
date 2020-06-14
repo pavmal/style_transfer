@@ -31,8 +31,6 @@ GO_TO_TRANSFORM = ['ещё', 'да', '+']
 ANSWER_BASE = 'Я тебя не понял :('
 
 from my_models import *
-style_img = image_loader("my_images/wolf.jpg")# as well as here
-content_img = image_loader("my_images/panda.jpg")#измените путь на тот который у вас.
 
 
 def save_data(key, value):
@@ -85,14 +83,15 @@ def dispatcher(message):
 
     if message.text.lower().strip() == '/start':
         bot.reply_to(message, 'Это бот для преобразования картинок и фотографий' +'\n'+
-                     'путём переноса стиля с одной картинки на другую' + '\n' +
-                     'Если хочешь попробовать, напиши: "+"', reply_markup=keyboard)
+                                'путём переноса стиля с одной картинки на другую', reply_markup=keyboard)
 
+    print(all_user_data)
     if all_user_data[user_id]['state_pic'] == 1 or all_user_data[user_id]['state_style'] == 1:
         bot.reply_to(message, 'Нужно выбрать картинку')
-    elif all_user_data[user_id]['state_pic'] == 0 and all_user_data[user_id]['state_style'] == 0:
+    if all_user_data[user_id]['state_pic'] == 0 and all_user_data[user_id]['state_style'] == 0:
         text_handler(message)
     else:
+        print('ветка фото')
         photo_handler(message)
 
     # print('Состояние до вопроса:\n{}'.format(all_user_data))
@@ -147,14 +146,17 @@ def text_handler(message):
 
 @bot.message_handler(content_types=["photo"])
 def photo_handler(message):
+    print('begin photo load')
     user_id = str(message.from_user.id)
     if all_user_data[user_id]['state_pic'] == 1:
-        all_user_data[user_id]['id_pic'] = message.photo[0].file_id
+        #all_user_data[user_id]['id_pic'] = message.photo[0].file_id
+        all_user_data[user_id]['id_pic'] = bot.get_file_url(message.photo[0].file_id)
         all_user_data[user_id]['state_pic'] = 0
 
         print('загрузка фото для трасформации')
     if all_user_data[user_id]['state_style'] == 1:
-        all_user_data[user_id]['id_style'] = message.photo[0].file_id
+        #all_user_data[user_id]['id_style'] = message.photo[0].file_id
+        all_user_data[user_id]['id_style'] = bot.get_file_url(message.photo[0].file_id)
         all_user_data[user_id]['state_style'] = 0
         print('загрузка фото со стилем')
 
@@ -192,8 +194,8 @@ def photo_handler(message):
     #with open('111.jpg', 'wb') as new_file:
     #    new_file.write(res)
 
-    file_info = bot.get_file(message.photo[0].file_id)
-    downloaded_file = bot.download_file(file_info.file_path)
+    #file_info = bot.get_file(message.photo[0].file_id)
+    #downloaded_file = bot.download_file(file_info.file_path)
     # with open('file_1.png', 'wb') as new_file:
     #     new_file.write(downloaded_file)
 
@@ -237,16 +239,19 @@ def base_handler(message):
 
     # save_data(user_id, json.dumps(all_user_data[user_id]))
 
+#def style_transform(img_content, img_style):
 def style_transform():
+    style_img = image_loader("my_images/wolf.jpg")  # as well as here
+    content_img = image_loader("my_images/panda.jpg")  # измените путь на тот который у вас.
+
+    #input_img = content_img.clone()
     input_img = content_img.clone()
     # if you want to use white noise instead uncomment the below line:
     # input_img = torch.randn(content_img.data.size(), device=device)
 
     # add the original input image to the figure:
-    #plt.figure()
     #models.imshow(input_img, title='Input Image')
-    output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std,
-                                content_img, style_img, input_img)
+    output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std, content_img, style_img, input_img)
 
     output = output.squeeze()
     np_out = output.cpu().detach().numpy()
