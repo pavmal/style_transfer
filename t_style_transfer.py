@@ -167,7 +167,6 @@ def style_transform(img_content, img_style):
 
 
 if __name__ == '__main__':
-    #style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
-    # style_transform()
+    # style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
 
     bot.polling()

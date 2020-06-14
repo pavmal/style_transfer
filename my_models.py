@@ -10,7 +10,7 @@ import copy
 from PIL import Image
 
 IMSIZE = 256
-NUM_STEPS = 300
+NUM_STEPS = 500
 
 
 class ContentLoss(nn.Module):
@@ -96,13 +96,12 @@ def gram_matrix(input):
 content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
-# cnn = models.vgg19(pretrained=True).features.to(device).eval()
+#cnn = models.vgg19(pretrained=True).features.to(device).eval()
 #cnn = models.vgg16(pretrained=True).features.to(device).eval()
 #cnn = models.alexnet(pretrained=True).features.to(device).eval()
 
-
-#with open('model.pkl', 'wb') as f:
-#   pickle.dump(cnn, f)
+# with open('model.pkl', 'wb') as f:
+#    pickle.dump(cnn, f)
 
 with open('model.pkl', 'rb') as f:
     cnn = pickle.load(f)
