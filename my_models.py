@@ -10,7 +10,7 @@ import copy
 from PIL import Image
 
 IMSIZE = 256
-NUM_STEPS = 500
+NUM_STEPS = 400
 
 
 class ContentLoss(nn.Module):
