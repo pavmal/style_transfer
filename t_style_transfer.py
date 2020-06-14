@@ -132,14 +132,25 @@ def text_handler(message):
         #bot.reply_to(message, 'Выбери картинку (фото) со стилем', reply_markup=types.ReplyKeyboardRemove())
         bot.reply_to(message, 'Выбери картинку (фото) со стилем')
     elif message.text == BTN_DONE:
-        #all_user_data[user_id]['state'] = 1
-        bot.reply_to(message, 'Это займет некоторое время')
-        style_transform()
-        res_photo = open('out.png', 'rb')
-        bot.send_photo(message.from_user.id, res_photo)
-        #bot.send_photo(message.from_user.id, message.photo[-1].file_id
+        if all_user_data[user_id]['id_pic'] == '':
+            bot.reply_to(message, 'Не выбрана картника для трансформации')
+        elif all_user_data[user_id]['id_style'] == '':
+            bot.reply_to(message, 'Не выбрана картника со стилем')
+        elif all_user_data[user_id]['id_pic'] == all_user_data[user_id]['id_style']:
+            bot.reply_to(message, 'Выбранные картинки совпадают')
+        else:
+            bot.reply_to(message, 'Это займет некоторое время', reply_markup=types.ReplyKeyboardRemove())
+            style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
+            #style_transform(all_user_data[user_id]['id_pic'], all_user_data[user_id]['id_style'])
+            res_photo = open('out.png', 'rb')
+
+            keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+            keyboard.add(types.KeyboardButton(BTN_PICTURE),
+                     types.KeyboardButton(BTN_STYLE),
+                     types.KeyboardButton(BTN_DONE))
+            bot.send_photo(message.from_user.id, res_photo, reply_markup=keyboard)
     else:
-        bot.reply_to(message, ANSWER_BASE + '\n' + 'Если хочешь попробовать, напиши: "+"')
+        bot.reply_to(message, ANSWER_BASE + '\n' + 'Выбери действие из меню клавиатуры')
 
     # save_data(user_id, json.dumps(all_user_data[user_id]))
 
@@ -147,90 +158,59 @@ def text_handler(message):
 
 @bot.message_handler(content_types=["photo"])
 def photo_handler(message):
-    print('begin photo load')
     user_id = str(message.from_user.id)
+    file_info = bot.get_file(message.photo[-1].file_id)
+    #downloaded_photo = bot.download_file(file_info.file_path)
+
+    file_name = ''
     if all_user_data[user_id]['state_pic'] == 1:
-        #all_user_data[user_id]['id_pic'] = message.photo[0].file_id
-        all_user_data[user_id]['id_pic'] = bot.get_file_url(message.photo[0].file_id)
+        file_name = user_id + '_1.png'
+        #all_user_data[user_id]['id_pic'] = bot.get_file_url(message.photo[-1].file_id)
+        all_user_data[user_id]['id_pic'] = file_name
         all_user_data[user_id]['state_pic'] = 0
 
-        print('загрузка фото для трасформации')
+
     if all_user_data[user_id]['state_style'] == 1:
-        #all_user_data[user_id]['id_style'] = message.photo[0].file_id
-        all_user_data[user_id]['id_style'] = bot.get_file_url(message.photo[0].file_id)
+        file_name = user_id + '_2.png'
+        #all_user_data[user_id]['id_style'] = bot.get_file_url(message.photo[-1].file_id)
+        all_user_data[user_id]['id_style'] = file_name
         all_user_data[user_id]['state_style'] = 0
-        print('загрузка фото со стилем')
 
-    #print(message.from_user.id, message.photo[-1].file_id)
-    print(message.from_user.id, message.photo[-1].file_id)
-    print(all_user_data)
-    #bot.send_photo(message.from_user.id, message.photo[0].file_id)
-
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    keyboard.add(types.KeyboardButton(BTN_PICTURE),
-                    types.KeyboardButton(BTN_STYLE),
-                    types.KeyboardButton(BTN_DONE))
-
-    bot.reply_to(message, 'Этa картинка принята для обработки', reply_markup=keyboard)
-
-    file_info = bot.get_file(message.photo[-1].file_id)
-    downloaded_photo = bot.download_file(file_info.file_path)
-    file_name = user_id + '_1.png'
-    with open(file_name, 'wb') as new_file:
-        new_file.write(downloaded_photo)
-    photo = open(file_name, 'rb')
-    bot.send_photo(message.from_user.id, photo)
-
-    print(file_info.file_path)
-    res = bot.get_file_url(file_id=message.photo[-1].file_id)
-    #f = requests.get(res)
-    print(res)
+    #with open(file_name, 'wb') as new_file:
+    #    new_file.write(downloaded_photo)
+    bot.reply_to(message, 'Этa картинка принята для обработки')
+    # photo = open(file_name, 'rb')
+    # bot.send_photo(message.from_user.id, photo)
 
 # save_data(user_id, json.dumps(all_user_data[user_id]))
+    print(all_user_data)
+
 
 @bot.message_handler(content_types=["document"])
 def document_handler(message):
-    print('catch document')
     user_id = str(message.from_user.id)
-    if all_user_data[user_id]['state_pic'] == 1:
-        #all_user_data[user_id]['id_pic'] = message.document.file_id
-        all_user_data[user_id]['id_pic'] = bot.get_file_url(message.document.file_id)
-        all_user_data[user_id]['state_pic'] = 0
-
-        print('загрузка фото для трасформации')
-    if all_user_data[user_id]['state_style'] == 1:
-        #all_user_data[user_id]['id_style'] = message.document.file_id
-        all_user_data[user_id]['id_style'] = bot.get_file_url(message.document.file_id)
-        all_user_data[user_id]['state_style'] = 0
-        print('загрузка фото со стилем')
-
-
-    print(message.from_user.id, message.document.file_id)
-    print(all_user_data)
-    #bot.send_photo(message.from_user.id, message.photo[0].file_id)
-
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    keyboard.add(types.KeyboardButton(BTN_PICTURE),
-                    types.KeyboardButton(BTN_STYLE),
-                    types.KeyboardButton(BTN_DONE))
-
-    bot.reply_to(message, 'Этa картинка принята для обработки', reply_markup=keyboard)
-
     file_info = bot.get_file(message.document.file_id)
     downloaded_docum = bot.download_file(file_info.file_path)
-    file_name = user_id + '_1.png'
+
+    file_name = ''
+    if all_user_data[user_id]['state_pic'] == 1:
+        file_name = user_id + '_1.png'
+        all_user_data[user_id]['id_pic'] = file_name
+        all_user_data[user_id]['state_pic'] = 0
+
+    if all_user_data[user_id]['state_style'] == 1:
+        file_name = user_id + '_2.png'
+        all_user_data[user_id]['id_style'] = file_name
+        all_user_data[user_id]['state_style'] = 0
+
     with open(file_name, 'wb') as new_file:
         new_file.write(downloaded_docum)
-    docum = open(file_name, 'rb')
-    bot.send_photo(message.from_user.id, docum)
-
-    print(file_info.file_path)
-    res = bot.get_file_url(file_id=message.document.file_id)
-    #f = requests.get(res)
-    print(res)
+    bot.reply_to(message, 'Этa картинка принята для обработки')
+    # docum = open(file_name, 'rb')
+    # bot.send_photo(message.from_user.id, docum)
 
 # save_data(user_id, json.dumps(all_user_data[user_id]))
-
+    print(all_user_data)
 
 
 def base_handler(message):
@@ -266,10 +246,12 @@ def base_handler(message):
 
     # save_data(user_id, json.dumps(all_user_data[user_id]))
 
-#def style_transform(img_content, img_style):
-def style_transform():
-    style_img = image_loader("my_images/wolf.jpg")  # as well as here
-    content_img = image_loader("my_images/panda.jpg")  # измените путь на тот который у вас.
+def style_transform(img_content, img_style):
+#def style_transform():
+#    content_img = image_loader("my_images/panda.jpg")  # измените путь на тот который у вас.
+#    style_img = image_loader("my_images/wolf.jpg")  # as well as here
+    content_img = image_loader(img_content)  # измените путь на тот который у вас.
+    style_img = image_loader(img_style)  # as well as here
 
     #input_img = content_img.clone()
     input_img = content_img.clone()
