@@ -163,21 +163,21 @@ def text_handler(message):
 @bot.message_handler(content_types=["photo"])
 def photo_handler(message):
     user_id = str(message.from_user.id)
-    file_info = bot.get_file(message.photo[-1].file_id)
+    #file_info = bot.get_file(message.photo[-1].file_id)
     #downloaded_photo = bot.download_file(file_info.file_path)
 
     file_name = ''
     if all_user_data[user_id]['state_pic'] == 1:
         file_name = user_id + '_1.png'
-        #all_user_data[user_id]['id_pic'] = bot.get_file_url(message.photo[-1].file_id)
-        all_user_data[user_id]['id_pic'] = file_name
+        all_user_data[user_id]['id_pic'] = bot.get_file_url(message.photo[-1].file_id)
+        #all_user_data[user_id]['id_pic'] = file_name
         all_user_data[user_id]['state_pic'] = 0
 
 
     if all_user_data[user_id]['state_style'] == 1:
         file_name = user_id + '_2.png'
-        #all_user_data[user_id]['id_style'] = bot.get_file_url(message.photo[-1].file_id)
-        all_user_data[user_id]['id_style'] = file_name
+        all_user_data[user_id]['id_style'] = bot.get_file_url(message.photo[-1].file_id)
+        #all_user_data[user_id]['id_style'] = file_name
         all_user_data[user_id]['state_style'] = 0
 
     #with open(file_name, 'wb') as new_file:
@@ -193,22 +193,24 @@ def photo_handler(message):
 @bot.message_handler(content_types=["document"])
 def document_handler(message):
     user_id = str(message.from_user.id)
-    file_info = bot.get_file(message.document.file_id)
-    downloaded_docum = bot.download_file(file_info.file_path)
+    #file_info = bot.get_file(message.document.file_id)
+    #downloaded_docum = bot.download_file(file_info.file_path)
 
     file_name = ''
     if all_user_data[user_id]['state_pic'] == 1:
         file_name = user_id + '_1.png'
+        all_user_data[user_id]['id_style'] = bot.get_file_url(message.document.file_id)
         all_user_data[user_id]['id_pic'] = file_name
         all_user_data[user_id]['state_pic'] = 0
 
     if all_user_data[user_id]['state_style'] == 1:
         file_name = user_id + '_2.png'
+        all_user_data[user_id]['id_style'] = bot.get_file_url(message.document.file_id)
         all_user_data[user_id]['id_style'] = file_name
         all_user_data[user_id]['state_style'] = 0
 
-    with open(file_name, 'wb') as new_file:
-        new_file.write(downloaded_docum)
+    #with open(file_name, 'wb') as new_file:
+    #    new_file.write(downloaded_docum)
     bot.reply_to(message, 'Этa картинка принята для обработки')
     # docum = open(file_name, 'rb')
     # bot.send_photo(message.from_user.id, docum)
@@ -254,8 +256,8 @@ def style_transform(img_content, img_style):
 #def style_transform():
 #    content_img = image_loader("my_images/panda.jpg")  # измените путь на тот который у вас.
 #    style_img = image_loader("my_images/wolf.jpg")  # as well as here
-    content_img = image_loader(img_content)  # измените путь на тот который у вас.
-    style_img = image_loader(img_style)  # as well as here
+    content_img = image_loader_url(img_content)  # измените путь на тот который у вас.
+    style_img = image_loader_url(img_style)  # as well as here
 
     #input_img = content_img.clone()
     input_img = content_img.clone()

@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import pickle
+import requests
 import matplotlib.pyplot as plt
 
 
@@ -22,10 +23,20 @@ loader = transforms.Compose([
 
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = torch.device("cpu")
+
 def image_loader(image_name):
     image = Image.open(image_name)
     image = loader(image).unsqueeze(0)
     return image.to(device, torch.float)
+
+def image_loader_url(image_url):
+    respon = requests.get(image_url)
+    with open('image_name', 'wb') as img_file:
+        img_file.write(respon.content)
+    image = Image.open('image_name')
+    image = loader(image).unsqueeze(0)
+    return image.to(device, torch.float)
+
 
 class ContentLoss(nn.Module):
 
