@@ -91,6 +91,7 @@ def dispatcher(message):
     if all_user_data[user_id]['state_pic'] == 0 and all_user_data[user_id]['state_style'] == 0:
         text_handler(message)
     else:
+        document_handler(message)
         print('ветка фото')
         photo_handler(message)
 
@@ -161,7 +162,7 @@ def photo_handler(message):
         print('загрузка фото со стилем')
 
     #print(message.from_user.id, message.photo[-1].file_id)
-    print(message.from_user.id, message.photo[0].file_id)
+    print(message.from_user.id, message.photo[-1].file_id)
     print(all_user_data)
     #bot.send_photo(message.from_user.id, message.photo[0].file_id)
 
@@ -171,32 +172,65 @@ def photo_handler(message):
                     types.KeyboardButton(BTN_DONE))
 
     bot.reply_to(message, 'Этa картинка принята для обработки', reply_markup=keyboard)
-    file_info = bot.get_file(file_id=message.photo[0].file_id)
 
-
-    print(file_info.file_path)
-    res = bot.get_file_url(file_id=message.photo[0].file_id)
-    #f = requests.get(res)
-    print(res)
-
-    respon = requests.get(res)
-    #print(respon.content)
-    #with open('111.jpg', 'wb') as new_file:
-    #    new_file.write(res)
-    print('respon - ok')
-
-    file_info = bot.get_file(message.photo[0].file_id)
+    file_info = bot.get_file(message.photo[-1].file_id)
     downloaded_photo = bot.download_file(file_info.file_path)
     file_name = user_id + '_1.png'
     with open(file_name, 'wb') as new_file:
         new_file.write(downloaded_photo)
     photo = open(file_name, 'rb')
     bot.send_photo(message.from_user.id, photo)
-    # src = message.photo[0].file_id
 
+    print(file_info.file_path)
+    res = bot.get_file_url(file_id=message.photo[-1].file_id)
+    #f = requests.get(res)
+    print(res)
 
-    print('ok')
 # save_data(user_id, json.dumps(all_user_data[user_id]))
+
+@bot.message_handler(content_types=["document"])
+def document_handler(message):
+    print('catch document')
+    user_id = str(message.from_user.id)
+    if all_user_data[user_id]['state_pic'] == 1:
+        #all_user_data[user_id]['id_pic'] = message.document.file_id
+        all_user_data[user_id]['id_pic'] = bot.get_file_url(message.document.file_id)
+        all_user_data[user_id]['state_pic'] = 0
+
+        print('загрузка фото для трасформации')
+    if all_user_data[user_id]['state_style'] == 1:
+        #all_user_data[user_id]['id_style'] = message.document.file_id
+        all_user_data[user_id]['id_style'] = bot.get_file_url(message.document.file_id)
+        all_user_data[user_id]['state_style'] = 0
+        print('загрузка фото со стилем')
+
+
+    print(message.from_user.id, message.document.file_id)
+    print(all_user_data)
+    #bot.send_photo(message.from_user.id, message.photo[0].file_id)
+
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    keyboard.add(types.KeyboardButton(BTN_PICTURE),
+                    types.KeyboardButton(BTN_STYLE),
+                    types.KeyboardButton(BTN_DONE))
+
+    bot.reply_to(message, 'Этa картинка принята для обработки', reply_markup=keyboard)
+
+    file_info = bot.get_file(message.document.file_id)
+    downloaded_docum = bot.download_file(file_info.file_path)
+    file_name = user_id + '_1.png'
+    with open(file_name, 'wb') as new_file:
+        new_file.write(downloaded_docum)
+    docum = open(file_name, 'rb')
+    bot.send_photo(message.from_user.id, docum)
+
+    print(file_info.file_path)
+    res = bot.get_file_url(file_id=message.document.file_id)
+    #f = requests.get(res)
+    print(res)
+
+# save_data(user_id, json.dumps(all_user_data[user_id]))
+
 
 
 def base_handler(message):
