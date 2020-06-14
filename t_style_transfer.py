@@ -141,8 +141,8 @@ def text_handler(message):
             bot.reply_to(message, 'Выбранные картинки совпадают')
         else:
             bot.reply_to(message, 'Это займет некоторое время', reply_markup=types.ReplyKeyboardRemove())
-            style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
-            #style_transform(all_user_data[user_id]['id_pic'], all_user_data[user_id]['id_style'])
+            #style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
+            style_transform(all_user_data[user_id]['id_pic'], all_user_data[user_id]['id_style'])
             res_photo = open('out.png', 'rb')
 
             keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
