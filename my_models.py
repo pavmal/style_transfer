@@ -20,7 +20,8 @@ loader = transforms.Compose([
     transforms.CenterCrop(imsize),
     transforms.ToTensor()])  # превращаем в удобный формат
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 def image_loader(image_name):
     image = Image.open(image_name)
     image = loader(image).unsqueeze(0)
@@ -84,7 +85,7 @@ class Normalization(nn.Module):
 content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
-#cnn = models.vgg19(pretrained=True).features.to('cpu').eval()
+
 #cnn = models.vgg19(pretrained=True).features.to(device).eval()
 #cnn = models.vgg16(pretrained=True).features.to(device).eval()
 #with open('model.pkl', 'wb') as f:
