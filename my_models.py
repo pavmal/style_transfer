@@ -97,15 +97,15 @@ content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 # cnn = models.vgg19(pretrained=True).features.to(device).eval()
-# cnn = models.vgg16(pretrained=True).features.to(device).eval()
-cnn = models.alexnet(pretrained=True).features.to(device).eval()
+#cnn = models.vgg16(pretrained=True).features.to(device).eval()
+#cnn = models.alexnet(pretrained=True).features.to(device).eval()
 
 
-# with open('model.pkl', 'wb') as f:
-#    pickle.dump(cnn, f)
+#with open('model.pkl', 'wb') as f:
+#   pickle.dump(cnn, f)
 
-# with open('model.pkl', 'rb') as f:
-#    cnn = pickle.load(f)
+with open('model.pkl', 'rb') as f:
+    cnn = pickle.load(f)
 
 def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
                                style_img, content_img,

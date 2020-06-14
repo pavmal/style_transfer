@@ -27,11 +27,12 @@ def dispatcher(message):
     :return: вызов необходимого обработчика с учетом статуса игрока в дереве вопросов
     """
     user_id = str(message.from_user.id)
-    all_user_data[user_id] = {}
-    all_user_data[user_id]['id_pic'] = ''
-    all_user_data[user_id]['id_style'] = ''
-    all_user_data[user_id]['state_pic'] = 0
-    all_user_data[user_id]['state_style'] = 0
+    if (user_id not in all_user_data) or (all_user_data[user_id] == None):
+        all_user_data[user_id] = {}
+        all_user_data[user_id]['id_pic'] = ''
+        all_user_data[user_id]['id_style'] = ''
+        all_user_data[user_id]['state_pic'] = 0
+        all_user_data[user_id]['state_style'] = 0
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     keyboard.add(types.KeyboardButton(BTN_PICTURE),
@@ -149,8 +150,8 @@ def document_handler(message):
 
 
 def style_transform(img_content, img_style):
-    #    content_img = image_loader("my_images/panda.jpg")
-    #    style_img = image_loader("my_images/wolf.jpg")
+    # content_img = image_loader("my_images/panda.jpg")
+    # style_img = image_loader("my_images/wolf.jpg")
     content_img = image_loader_url(img_content)
     style_img = image_loader_url(img_style)
 
@@ -166,7 +167,7 @@ def style_transform(img_content, img_style):
 
 
 if __name__ == '__main__':
-    # style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
+    #style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
     # style_transform()
 
     bot.polling()
