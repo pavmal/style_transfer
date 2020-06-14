@@ -2,4 +2,4 @@ pyTelegramBotAPI
 requests
 redis
 numpy
-PIL
+Pillow
