@@ -84,7 +84,7 @@ class Normalization(nn.Module):
 content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
-cnn = models.vgg19(pretrained=True).features.to(device).eval()
+#cnn = models.vgg19(pretrained=True).features.to(device).eval()
 
 
 def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
