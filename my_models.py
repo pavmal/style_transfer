@@ -98,9 +98,9 @@ style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 #cnn = models.vgg19(pretrained=True).features.to(device).eval()
 #cnn = models.vgg16(pretrained=True).features.to(device).eval()
-#cnn = models.alexnet(pretrained=True).features.to(device).eval()
+cnn = models.alexnet(pretrained=True).features.to(device).eval()
 #cnn = models.densenet121(pretrained=True).features.to(device).eval()
-cnn = models.densenet201(pretrained=True).features.to(device).eval()
+#cnn = models.densenet201(pretrained=True).features.to(device).eval()
 #cnn = models.mobilenet_v2(pretrained=True).features.to(device).eval()
 
 
