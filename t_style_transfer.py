@@ -84,7 +84,8 @@ def text_handler(message):
         elif all_user_data[user_id]['id_pic'] == all_user_data[user_id]['id_style']:
             bot.reply_to(message, 'Выбранные картинки совпадают')
         else:
-            bot.reply_to(message, 'Это займет некоторое время', reply_markup=types.ReplyKeyboardRemove())
+            bot.reply_to(message, 'Это займет некоторое время. Ждите...' + '\n' +
+                         'Результат будет направлен в ответном сообщении', reply_markup=types.ReplyKeyboardRemove())
             # style_transform("my_images/panda.jpg", "my_images/wolf.jpg")
             style_transform(all_user_data[user_id]['id_pic'], all_user_data[user_id]['id_style'])
             res_photo = open('out.png', 'rb')
