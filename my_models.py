@@ -1,41 +1,17 @@
-from PIL import Image
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import pickle
-import requests
-import matplotlib.pyplot as plt
-
-
 import torchvision.transforms as transforms
 import torchvision.models as models
-
+import requests
+import pickle
 import copy
+from PIL import Image
 
-imsize = 256
-
-loader = transforms.Compose([
-    transforms.Resize(imsize),  # нормируем размер изображения
-    transforms.CenterCrop(imsize),
-    transforms.ToTensor()])  # превращаем в удобный формат
-
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
-
-def image_loader(image_name):
-    image = Image.open(image_name)
-    image = loader(image).unsqueeze(0)
-    return image.to(device, torch.float)
-
-def image_loader_url(image_url):
-    respon = requests.get(image_url)
-    with open('image_name', 'wb') as img_file:
-        img_file.write(respon.content)
-    image = Image.open('image_name')
-    image = loader(image).unsqueeze(0)
-    return image.to(device, torch.float)
+IMSIZE = 256
+IMSIZE = 128
+NUM_STEPS = 300
 
 
 class ContentLoss(nn.Module):
@@ -53,18 +29,6 @@ class ContentLoss(nn.Module):
         self.loss = F.mse_loss(input, self.target)
         return input
 
-def gram_matrix(input):
-    batch_size, h, w, f_map_num = input.size()  # batch size(=1)
-    # b=number of feature maps
-    # (h,w)=dimensions of a feature map (N=h*w)
-
-    features = input.view(batch_size * h, w * f_map_num)  # resise F_XL into \hat F_XL
-
-    G = torch.mm(features, features.t())  # compute the gram product
-
-    # we 'normalize' the values of the gram matrix
-    # by dividing by the number of element in each feature maps.
-    return G.div(batch_size * h * w * f_map_num)
 
 class StyleLoss(nn.Module):
     def __init__(self, target_feature):
@@ -77,8 +41,6 @@ class StyleLoss(nn.Module):
         self.loss = F.mse_loss(G, self.target)
         return input
 
-cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
-cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
 class Normalization(nn.Module):
     def __init__(self, mean, std):
@@ -93,25 +55,64 @@ class Normalization(nn.Module):
         # normalize img
         return (img - self.mean) / self.std
 
+
+loader = transforms.Compose([
+    transforms.Resize(IMSIZE),  # нормируем размер изображения
+    transforms.CenterCrop(IMSIZE),
+    transforms.ToTensor()])  # превращаем в удобный формат
+
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
+cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
+cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
+
+
+def image_loader(image_name):
+    image = Image.open(image_name)
+    image = loader(image).unsqueeze(0)
+    return image.to(device, torch.float)
+
+
+def image_loader_url(image_url):
+    respon = requests.get(image_url)
+    with open('image_name', 'wb') as img_file:
+        img_file.write(respon.content)
+    image = Image.open('image_name')
+    image = loader(image).unsqueeze(0)
+    return image.to(device, torch.float)
+
+
+def gram_matrix(input):
+    batch_size, h, w, f_map_num = input.size()  # batch size(=1)
+    # b=number of feature maps
+    # (h,w)=dimensions of a feature map (N=h*w)
+
+    features = input.view(batch_size * h, w * f_map_num)  # resise F_XL into \hat F_XL
+    G = torch.mm(features, features.t())  # compute the gram product
+    # we 'normalize' the values of the gram matrix
+    # by dividing by the number of element in each feature maps.
+    return G.div(batch_size * h * w * f_map_num)
+
+
 content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
-
-#cnn = models.vgg19(pretrained=True).features.to(device).eval()
-#cnn = models.vgg16(pretrained=True).features.to(device).eval()
+# cnn = models.vgg19(pretrained=True).features.to(device).eval()
+# cnn = models.vgg16(pretrained=True).features.to(device).eval()
 cnn = models.alexnet(pretrained=True).features.to(device).eval()
 
-#with open('model.pkl', 'wb') as f:
+
+# with open('model.pkl', 'wb') as f:
 #    pickle.dump(cnn, f)
 
-#with open('model.pkl', 'rb') as f:
+# with open('model.pkl', 'rb') as f:
 #    cnn = pickle.load(f)
 
 def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
                                style_img, content_img,
                                content_layers=content_layers_default,
                                style_layers=style_layers_default):
-#    cnn = copy.deepcopy(cnn)
+    #    cnn = copy.deepcopy(cnn)
 
     # normalization module
     normalization = Normalization(normalization_mean, normalization_std).to(device)
@@ -165,10 +166,10 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
     for i in range(len(model) - 1, -1, -1):
         if isinstance(model[i], ContentLoss) or isinstance(model[i], StyleLoss):
             break
-
     model = model[:(i + 1)]
 
     return model, style_losses, content_losses
+
 
 def get_input_optimizer(input_img):
     # this line to show that input is a parameter that requires a gradient
@@ -176,14 +177,15 @@ def get_input_optimizer(input_img):
     optimizer = optim.LBFGS([input_img.requires_grad_()])
     return optimizer
 
-def run_style_transfer(cnn, normalization_mean, normalization_std,
-                           content_img, style_img, input_img, num_steps=500,
-                           style_weight=100000, content_weight=1):
+
+def run_style_transfer(cnn, normalization_mean, normalization_std, content_img, style_img, input_img,
+                       num_steps=NUM_STEPS,
+                       style_weight=100000,
+                       content_weight=1):
     """Run the style transfer."""
     print('Building the style transfer model..')
-    model, style_losses, content_losses = get_style_model_and_losses(cnn,
-                                                                         normalization_mean, normalization_std,
-                                                                         style_img, content_img)
+    model, style_losses, content_losses = get_style_model_and_losses(cnn, normalization_mean, normalization_std,
+                                                                     style_img, content_img)
     optimizer = get_input_optimizer(input_img)
 
     print('Optimizing..')
@@ -194,9 +196,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
             # correct the values
             # это для того, чтобы значения тензора картинки не выходили за пределы [0;1]
             input_img.data.clamp_(0, 1)
-
             optimizer.zero_grad()
-
             model(input_img)
 
             style_score = 0
@@ -210,7 +210,6 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
             # взвешивание ощибки
             style_score *= style_weight
             content_score *= content_weight
-
             loss = style_score + content_score
             loss.backward()
 
@@ -224,10 +223,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
             return style_score + content_score
 
         optimizer.step(closure)
-
     # a last correction...
     input_img.data.clamp_(0, 1)
 
-
     return input_img
-
