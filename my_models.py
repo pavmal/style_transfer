@@ -4,13 +4,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.transforms as transforms
 import torchvision.models as models
+import torchvision.models.mobilenet as mbnet
 import requests
-import pickle
 import copy
 from PIL import Image
 
 IMSIZE = 256
-NUM_STEPS = 400
+NUM_STEPS = 300
 
 
 class ContentLoss(nn.Module):
@@ -96,24 +96,18 @@ def gram_matrix(input):
 content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
-#cnn = models.vgg19(pretrained=True).features.to(device).eval()
-#cnn = models.vgg16(pretrained=True).features.to(device).eval()
-cnn = models.alexnet(pretrained=True).features.to(device).eval()
-#cnn = models.densenet121(pretrained=True).features.to(device).eval()
-#cnn = models.densenet201(pretrained=True).features.to(device).eval()
-#cnn = models.mobilenet_v2(pretrained=True).features.to(device).eval()
+# cnn = models.vgg19(pretrained=True).features.to(device).eval()
+# cnn = models.vgg16(pretrained=True).features.to(device).eval()
+# cnn = models.alexnet(pretrained=True).features.to(device).eval()
+# cnn = models.densenet121(pretrained=True).features.to(device).eval()
+# cnn = models.densenet201(pretrained=True).features.to(device).eval()
+cnn = models.mobilenet_v2(pretrained=True).features.to(device).eval()
 
 
-# with open('model.pkl', 'wb') as f:
-#    pickle.dump(cnn, f)
-
-#with open('model.pkl', 'rb') as f:
-#    cnn = pickle.load(f)
-
-def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
-                               style_img, content_img,
-                               content_layers=content_layers_default,
-                               style_layers=style_layers_default):
+def get_style_model_and_losses_original(cnn, normalization_mean, normalization_std,
+                                        style_img, content_img,
+                                        content_layers=content_layers_default,
+                                        style_layers=style_layers_default):
     #    cnn = copy.deepcopy(cnn)
 
     # normalization module
@@ -229,3 +223,58 @@ def run_style_transfer(cnn, normalization_mean, normalization_std, content_img, 
     input_img.data.clamp_(0, 1)
 
     return input_img
+
+
+# версия функции для модели MobileNet
+def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
+                               style_img, content_img,
+                               content_layers=content_layers_default,
+                               style_layers=style_layers_default):
+    #    cnn = copy.deepcopy(cnn)
+
+    # normalization module
+    normalization = Normalization(normalization_mean, normalization_std).to(device)
+
+    # just in order to have an iterable access to or list of content/syle
+    # losses
+    content_losses = []
+    style_losses = []
+
+    # assuming that cnn is a nn.Sequential, so we make a new nn.Sequential
+    # to put in modules that are supposed to be activated sequentially
+    model = nn.Sequential(normalization)
+
+    i = 0  # increment every time we see a conv
+    for layer in cnn.children():
+        if isinstance(layer, mbnet.ConvBNReLU) or isinstance(layer, mbnet.InvertedResidual):
+            i += 1
+            name = 'conv_{}'.format(i)
+        else:
+            raise RuntimeError('Unrecognized layer: {}'.format(layer.__class__.__name__))
+
+        model.add_module(name, layer)
+
+        if name in content_layers:
+            # add content loss:
+            target = model(content_img).detach()
+            content_loss = ContentLoss(target)
+            model.add_module("content_loss_{}".format(i), content_loss)
+            content_losses.append(content_loss)
+
+        if name in style_layers:
+            # add style loss:
+            target_feature = model(style_img).detach()
+            style_loss = StyleLoss(target_feature)
+            model.add_module("style_loss_{}".format(i), style_loss)
+            style_losses.append(style_loss)
+
+    # now we trim off the layers after the last content and style losses
+    # выбрасываем все уровни после последенего styel loss или content loss
+    for i in range(len(model) - 1, -1, -1):
+        if isinstance(model[i], ContentLoss) or isinstance(model[i], StyleLoss):
+            break
+    model = model[:(i + 1)]
+    # print('++++++++++++++++++')
+    # print(model)
+
+    return model, style_losses, content_losses
