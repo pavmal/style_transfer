@@ -12,7 +12,7 @@ from PIL import Image
 
 IMSIZE = 256
 IMSIZE = 128
-NUM_STEPS = 50
+NUM_STEPS = 90
 
 
 class ContentLoss(nn.Module):
@@ -95,8 +95,8 @@ def gram_matrix(input):
     return G.div(batch_size * h * w * f_map_num)
 
 
-content_layers_default = ['conv_4']
-style_layers_default = ['conv_1', 'conv_3', 'conv_5']
+content_layers_default = ['conv_3']
+style_layers_default = ['conv_1', 'conv_3']
 #style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 # cnn = models.vgg19(pretrained=True).features.to(device).eval()
