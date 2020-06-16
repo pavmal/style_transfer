@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 import torchvision.models.mobilenet as mbnet
 import requests
+import gc
 import copy
 from PIL import Image
 
@@ -194,6 +195,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std, content_img, 
             # это для того, чтобы значения тензора картинки не выходили за пределы [0;1]
             input_img.data.clamp_(0, 1)
             optimizer.zero_grad()
+            gc.collect()
             model(input_img)
 
             style_score = 0

@@ -151,10 +151,10 @@ def document_handler(message):
 
 
 def style_transform(img_content, img_style):
-    content_img = image_loader("my_images/panda.jpg")
-    style_img = image_loader("my_images/wolf.jpg")
-    # content_img = image_loader_url(img_content)
-    # style_img = image_loader_url(img_style)
+    # content_img = image_loader("my_images/panda.jpg")
+    # style_img = image_loader("my_images/wolf.jpg")
+    content_img = image_loader_url(img_content)
+    style_img = image_loader_url(img_style)
 
     input_img = content_img.clone()
     output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std, content_img, style_img, input_img)
@@ -168,5 +168,5 @@ def style_transform(img_content, img_style):
 
 
 if __name__ == '__main__':
-    style_transform(' ', ' ') #for local test
-    #bot.polling()
+    #style_transform(' ', ' ') #for local test
+    bot.polling()
