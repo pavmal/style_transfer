@@ -93,8 +93,8 @@ def gram_matrix(input):
     return G.div(batch_size * h * w * f_map_num)
 
 
-content_layers_default = ['conv_4']
-style_layers_default = ['conv_1', 'conv_3', 'conv_5']
+content_layers_default = ['conv_2']
+style_layers_default = ['conv_1', 'conv_3']
 #style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 # cnn = models.vgg19(pretrained=True).features.to(device).eval()
