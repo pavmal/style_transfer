@@ -168,5 +168,6 @@ def style_transform(img_content, img_style):
 
 
 if __name__ == '__main__':
-    #style_transform(' ', ' ') #for local test
+    #style_transform('https://avatars.mds.yandex.net/get-pdb/2109182/6f8c823a-9f48-4092-88da-d3eaa4cea35c/s1200?webp=false',
+    #                'https://avatars.mds.yandex.net/get-pdb/1898150/b9bd68b9-dbed-44df-9f4b-e616405e0842/s1200') #for local test
     bot.polling()
